@@ -1,0 +1,195 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Enter an access key or host and port.\n\"Use Media Network to share this library and enable DLNA\" must be enabled in Options > Media Network.",
+        "data": {
+          "api_key": "[%key:common::config_flow::data::api_key%]",
+          "name": "[%key:common::config_flow::data::name%]",
+          "host": "[%key:common::config_flow::data::host%]",
+          "port": "[%key:common::config_flow::data::port%]",
+          "ssl": "[%key:common::config_flow::data::ssl%]"
+        },
+        "data_description": {
+          "api_key": "The access key shown in Options > Media Network.",
+          "name": "A memorable name for the server, will default to the hostname if discovered via an access key",
+          "host": "The hostname or IP address of the system hosting your JRiver Media Server."
+        }
+      },
+      "credentials": {
+        "description": "Please enter your JRiver Media Server user name and password. These can be found in Options > Media Network > Authentication",
+        "data": {
+          "username": "[%key:common::config_flow::data::username%]",
+          "password": "[%key:common::config_flow::data::password%]"
+        }
+      },
+      "macs": {
+        "description": "Select the MAC addresses that should be used for wake on lan.\nRequires the Home Assistant Wake on LAN integration to be enabled.",
+        "data": {
+          "use_wol": "Configure remote.wake service? (requires at least 1 MAC address)",
+          "mac": "MAC address"
+        }
+      },
+      "paths": {
+        "description": "Please select the remote views that you want to be able to browse in Home Assistant. These can be found in the \"Customize views for JRemote, Gizmo and Panel\" configuration in Options > Media Network > Advanced. Upgrade to MC32 to remove the need to provide this information manually.",
+        "data": {
+          "browse_paths": "View Paths"
+        }
+      },
+      "zones": {
+        "description": "Choose whether to expose zones as separate devices.",
+        "data": {
+          "per_zone": "Show zones as separate devices"
+        }
+      },
+      "select_zones": {
+        "description": "Choose which zones to expose as a device.",
+        "data": {
+          "zone_names": "Zones"
+        }
+      },
+      "select_playback_fields": {
+        "description": "Specify additional library fields to expose as attributes on the playing now sensor(s).",
+        "data": {
+          "extra_fields": "Field Name"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "invalid_access_key": "Unable to resolve Access Key",
+      "timeout_connect": "[%key:common::config_flow::error::timeout_connect%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]",
+      "no_paths": "No view paths provided",
+      "invalid_paths": "Path format is incorrect.",
+      "no_zones": "Must select at least one zone.",
+      "no_mac_addresses": "Must provide at least one MAC address or disable WOL support.",
+      "invalid_mac": "Invalid MAC address, must be 6 pairs of hex digits separated by :"
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Please select the remote views that you want to be able to browse in Home Assistant. These can be found in the \"Customize views for JRemote, Gizmo and Panel\" configuration in Options > Media Network > Advanced. Upgrade to MC32 to remove the need to provide this information manually.",
+        "data": {
+          "browse_paths": "View Paths"
+        }
+      },
+      "fields": {
+        "description": "Specify additional library fields to expose as attributes on the playing now sensor(s).",
+        "data": {
+          "extra_fields": "Field Name"
+        }
+      },
+      "macs": {
+        "description": "Select the MAC addresses that should be used for wake on lan.\nRequires the Home Assistant Wake on LAN integration to be enabled.",
+        "data": {
+          "use_wol": "Enable remote.wake service.",
+          "mac": "MAC address"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "invalid_access_key": "Unable to resolve Access Key",
+      "timeout_connect": "[%key:common::config_flow::error::timeout_connect%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]",
+      "no_paths": "No view paths provided",
+      "invalid_paths": "Path format is incorrect.",
+      "no_mac_addresses": "Must provide at least one MAC address or disable WOL support.",
+      "invalid_mac": "Invalid MAC address, must be 6 pairs of hex digits separated by :"
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]"
+    }
+  },
+  "services": {
+    "add_to_playlist": {
+      "name": "Add to playlist",
+      "description": "Adds library items to the Playing Now playlist. Must provide either a query or a playlist.",
+      "fields": {
+        "query": {
+          "name": "Search Query",
+          "description": "A JRiver search expression as per https://wiki.jriver.com/index.php/Search_Language"
+        },
+        "playlist_path": {
+          "name": "Playlist Path",
+          "description": "A path to a playlist to play."
+        }
+      }
+    },
+    "activate_zone": {
+      "name": "Set Active Zone",
+      "description": "Sets the active zone.",
+      "fields": {
+        "zone_name": {
+          "name": "Zone Name",
+          "description": "A JRiver zone name"
+        }
+      }
+    },
+    "seek_relative": {
+      "name": "Relative position seek",
+      "description": "Move forward or backward by the specified amount in seconds.",
+      "fields": {
+        "seek_duration": {
+          "name": "Seek amount",
+          "description": "Number of seconds to seek forwards or backwards."
+        }
+      }
+    },
+    "adjust_volume": {
+      "name": "Relative volume adjustment",
+      "description": "Change volume up or down by a given amount.",
+      "fields": {
+        "delta": {
+          "name": "Volume adjustment",
+          "description": "Amount (%age) to change volume by."
+        }
+      }
+    },
+    "send_mcc": {
+      "name": "Send MCC command",
+      "description": "Sends an MCC command.",
+      "fields": {
+        "command": {
+          "name": "MCC command id",
+          "description": "An MCC command"
+        },
+        "parameter": {
+          "name": "Parameter to an MCC command",
+          "description": "Optional parameter"
+        },
+        "block": {
+          "name": "Controls whether the call is blocking",
+          "description": "true to block, false to return immediately"
+        },
+        "zone_name": {
+          "name": "Target zone name",
+          "description": "A Media Server zone"
+        }
+      }
+    },
+    "wake": {
+      "name": "Use Wake On Lan to wake the MediaServer",
+      "description": "Sends a WOL magic packet.",
+      "fields": {
+        "entity_id": {
+          "name": "entity id",
+          "description": "the target media server"
+        }
+      }
+    }
+  }
+}

@@ -298,6 +298,7 @@ FLOWS = {
         "izone",
         "jellyfin",
         "jewish_calendar",
+        "jriver",
         "juicenet",
         "justnimbus",
         "jvc_projector",

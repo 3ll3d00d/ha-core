@@ -1079,6 +1079,9 @@ habitipy==0.3.1
 # homeassistant.components.bluetooth
 habluetooth==3.5.0
 
+# homeassistant.components.jriver
+hamcws==0.1.31
+
 # homeassistant.components.cloud
 hass-nabucasa==0.81.1
 
