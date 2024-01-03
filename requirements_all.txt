@@ -1177,6 +1177,9 @@ habluetooth==5.8.0
 # homeassistant.components.hanna
 hanna-cloud==0.0.7
 
+# homeassistant.components.jriver
+hamcws==0.2.7
+
 # homeassistant.components.cloud
 hass-nabucasa==1.13.0
 
