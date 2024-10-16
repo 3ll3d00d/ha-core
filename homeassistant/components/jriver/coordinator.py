@@ -9,6 +9,7 @@ import logging
 from typing import TypeVar
 
 from hamcws import (
+    AudioPath,
     BrowsePath,
     CannotConnectError,
     InvalidAuthError,
@@ -32,7 +33,6 @@ from .const import DOMAIN, _can_refresh_paths
 
 V = TypeVar("V")
 
-
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -42,7 +42,9 @@ class MediaServerData:
 
     server_info: MediaServerInfo | None = None
     playback_info_by_zone: dict[str, PlaybackInfo] = field(default_factory=dict)
+    audio_path_by_zone: dict[str, AudioPath] = field(default_factory=dict)
     position_updated_at_by_zone: dict[str, dt.datetime] = field(default_factory=dict)
+    playlist_by_zone: dict[str, list[dict]] = field(default_factory=dict)
     zones: list[Zone] = field(default_factory=list)
     view_mode: ViewMode = ViewMode.UNKNOWN
     browse_paths: list[BrowsePath] | None = None
@@ -59,6 +61,14 @@ class MediaServerData:
     def get_playback_info(self, target_zone: str | None) -> PlaybackInfo | None:
         """Get PlaybackInfo for the given zone if provided or the currently active zone."""
         return self._get_val_for_zone(self.playback_info_by_zone, target_zone)
+
+    def get_audio_path(self, target_zone: str | None) -> AudioPath | None:
+        """Get AudioPath for the given zone if provided or the currently active zone."""
+        return self._get_val_for_zone(self.audio_path_by_zone, target_zone)
+
+    def get_playlist(self, target_zone: str | None) -> list[dict] | None:
+        """Get the playlist for the given zone if provided or the currently active zone."""
+        return self._get_val_for_zone(self.playlist_by_zone, target_zone)
 
     def get_position_updated_at(self, target_zone: str | None) -> dt.datetime | None:
         """Get last position updated at for the given zone if provided or the currently active zone."""
@@ -146,9 +156,12 @@ class MediaServerUpdateCoordinator(DataUpdateCoordinator[MediaServerData]):
                 self._media_server.get_zones(),
                 self._media_server.get_view_mode(),
             )
-            zone_tasks: list[asyncio.Task]
+
+            playback_info_tasks: list[asyncio.Task]
+            audio_path_tasks: list[asyncio.Task]
+            current_playlist_tasks: list[asyncio.Task]
             async with asyncio.TaskGroup() as tg:
-                zone_tasks = [
+                playback_info_tasks = [
                     tg.create_task(
                         self._media_server.get_playback_info(
                             zone, extra_fields=self._extra_fields
@@ -156,12 +169,21 @@ class MediaServerUpdateCoordinator(DataUpdateCoordinator[MediaServerData]):
                     )
                     for zone in zones
                 ]
+                audio_path_tasks = [
+                    tg.create_task(self._media_server.get_audio_path(zone))
+                    for zone in zones
+                ]
+                current_playlist_tasks = [
+                    # FIXFIX list of fields to include
+                    tg.create_task(self._media_server.get_current_playlist(zone=zone))
+                    for zone in zones
+                ]
 
             playback_info_by_zone: dict[str, PlaybackInfo] = {}
             position_updated_at_by_zone: dict[str, dt.datetime] = {}
             pos_updated_at = dt_util.utcnow()
 
-            for i, task in enumerate(zone_tasks):
+            for i, task in enumerate(playback_info_tasks):
                 zone_name = zones[i].name
                 playback_info: PlaybackInfo = task.result()
                 playback_info_by_zone[zone_name] = playback_info
@@ -181,10 +203,22 @@ class MediaServerUpdateCoordinator(DataUpdateCoordinator[MediaServerData]):
                     )
                     position_updated_at_by_zone[zone_name] = pos_updated_at
 
+            audio_path_by_zone: dict[str, AudioPath] = {}
+            for i, task in enumerate(audio_path_tasks):
+                zone_name = zones[i].name
+                audio_path_by_zone[zone_name] = task.result()
+
+            playlist_by_zone: dict[str, list[dict]] = {}
+            for i, task in enumerate(current_playlist_tasks):
+                zone_name = zones[i].name
+                playlist_by_zone[zone_name] = task.result()
+
             new_data = MediaServerData(
                 server_info=server_info,
                 playback_info_by_zone=playback_info_by_zone,
                 position_updated_at_by_zone=position_updated_at_by_zone,
+                audio_path_by_zone=audio_path_by_zone,
+                playlist_by_zone=playlist_by_zone,
                 zones=zones,
                 view_mode=view_mode,
                 browse_paths=await self._refresh_paths_if_necessary(
